@@ -1,0 +1,135 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+class ApiService {
+  // 1. Flask API URL for glucose prediction
+  static const String flaskApiUrl =
+      'https://your-ngrok-url.ngrok-free.app/predict'; // 🔥 Change this to your ngrok URL
+
+  // 2. PHP Backend URL for database
+  static const String phpApiUrl =
+      'http://10.5.66.109/glucometer/'; // 🔥 Corrected PHP server address
+
+  // Function to get predicted glucose level from Flask API
+  Future<void> getGlucosePrediction(int userId, List<double> inputData) async {
+    try {
+      final response = await http.post(
+        Uri.parse(flaskApiUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'glucose_data': inputData, // 🛠 Corrected to 'glucose_data'
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+
+        // 🛠 Extract predicted value from response
+        double predictedValue = data['predicted_glucose'];
+        print("Predicted Glucose Level: $predictedValue");
+
+        // 🛠 Now, save it into the database
+        await addPredictedGlucoseReading(userId, predictedValue);
+      } else {
+        print('Failed to get prediction.');
+      }
+    } catch (e) {
+      print('Error during prediction: $e');
+    }
+  }
+
+  // Function to save predicted glucose level into database (PHP Backend)
+  Future<void> addPredictedGlucoseReading(
+    int userId,
+    double predictedValue,
+  ) async {
+    final url = Uri.parse(
+      '${phpApiUrl}add_predicted_reading.php',
+    ); // 🔥 New PHP API to save predicted value
+
+    try {
+      final response = await http.post(
+        url,
+        body: {
+          'user_id': userId.toString(),
+          'predicted_glucose': predictedValue.toString(),
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true) {
+          print('Predicted glucose reading added successfully!');
+        } else {
+          print('Error: ${data['message']}');
+        }
+      } else {
+        print('Failed to add predicted glucose reading.');
+      }
+    } catch (e) {
+      print('Error while saving predicted glucose reading: $e');
+    }
+  }
+
+  // Function to register user (PHP Backend)
+  Future<void> registerUser(
+    String userName,
+    String userRole,
+    String email,
+    String password,
+  ) async {
+    final url = Uri.parse('${phpApiUrl}register.php');
+
+    final response = await http.post(
+      url,
+      body: {
+        "name": userName,
+        "role": userRole,
+        "email": email,
+        "password": password,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data['success'] == true) {
+        print('User registered successfully!');
+      } else {
+        print('Error: ${data['message']}');
+        throw Exception(data['message']);
+      }
+    } else {
+      print('Failed to register user. Server Error.');
+      throw Exception('Failed to register user');
+    }
+  }
+
+  // Function to add manual glucose reading to database (PHP Backend)
+  Future<void> addGlucoseReading(
+    int userId,
+    double glucoseLevel,
+    String dateTime,
+  ) async {
+    final url = Uri.parse('${phpApiUrl}add_reading.php');
+
+    final response = await http.post(
+      url,
+      body: {
+        'user_id': userId.toString(),
+        'glucose_level': glucoseLevel.toString(),
+        'date_time': dateTime,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data['status'] == 'success') {
+        print('Glucose reading added successfully!');
+      } else {
+        print('Error: ${data['message']}');
+      }
+    } else {
+      print('Failed to add glucose reading. Server Error.');
+    }
+  }
+}

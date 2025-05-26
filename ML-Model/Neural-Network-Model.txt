@@ -1,0 +1,222 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sb
+
+from google.colab import files
+uploaded = files.upload()
+
+# Load and explore dataset
+dataset = pd.read_csv('FYP_Data_updated-153.csv')  # Make sure file has 100 entries
+
+print(dataset)
+
+# Drop unnecessary columns
+dataset.drop(['No.', 'Name'], axis=1, inplace=True)
+
+# Fill missing categorical data
+dataset['Gender'].fillna('M', inplace=True)
+dataset['Meal/Fast'].fillna('Two hours after lunch', inplace=True)
+
+# Fill missing numeric data with median
+dataset['Invasive'] = pd.to_numeric(dataset['Invasive'], errors='coerce')
+dataset['Non-Invasive'] = pd.to_numeric(dataset['Non-Invasive'], errors='coerce')
+dataset['Invasive'].fillna(dataset['Invasive'].median(), inplace=True)
+dataset['Non-Invasive'].fillna(dataset['Non-Invasive'].median(), inplace=True)
+
+# Encode categorical variables
+dataset['Gender'] = dataset['Gender'].map({'M': 1, 'F': 2})
+dataset['History'] = dataset['History'].map({'Yes': 1, 'No': 0})
+dataset['Dia/Non'] = dataset['Dia/Non'].map({'Dia': 1, 'Non': 0})
+dataset['Meal/Fast'] = pd.to_numeric(dataset['Meal/Fast'], errors='coerce')
+dataset['Meal/Fast'].fillna(1.0, inplace=True)  # defaulting to "Two hours after lunch" equivalent
+
+# Drop any remaining NaNs just in case
+dataset.dropna(inplace=True)
+
+print(dataset)
+
+# Print to verify
+print("✅ Cleaned dataset (First 5 entries):")
+print(dataset.head())
+print("\n📊 Data Types:\n", dataset.dtypes)
+
+# Correlation heatmap
+plt.figure(figsize=(10, 6))
+sb.heatmap(data=dataset.corr(), cmap="YlGnBu", annot=True)
+plt.title("🔍 Feature Correlation Heatmap")
+plt.show()
+
+# Split features and label
+Y = dataset['Invasive']
+X = dataset.drop(['Invasive'], axis=1)
+
+# Normalize data
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Train-test split
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X_scaled, Y, test_size=0.2, random_state=42)
+
+# Build Neural Network model
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+
+model = Sequential()
+model.add(Dense(64, input_dim=X_train.shape[1], activation='relu'))
+model.add(Dense(32, activation='relu'))
+model.add(Dense(1))  # Output layer for regression
+
+model.compile(optimizer='adam', loss='mse', metrics=['mae'])
+
+# Train the model
+history = model.fit(X_train, y_train, epochs=100, batch_size=10, validation_split=0.1, verbose=1)
+
+# Plot training loss
+plt.plot(history.history['loss'], label='Training Loss')
+plt.plot(history.history['val_loss'], label='Validation Loss')
+plt.xlabel("Epochs")
+plt.ylabel("Loss")
+plt.legend()
+plt.title("📉 Model Training History")
+plt.show()
+
+# Check training results
+print("\n📉 Final training loss:", round(history.history['loss'][-1], 4))
+print("📈 Final validation loss:", round(history.history['val_loss'][-1], 4))
+
+# Sample prediction input
+print("\nDataset columns for input order:")
+print(X.columns.tolist())
+
+print(dataset)
+
+print(dataset.keys())
+
+# Predict on all 100 entries
+y_all_pred = model.predict(X_scaled)
+
+# Evaluation on all 100 entries
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+import numpy as np
+
+mae = mean_absolute_error(Y, y_all_pred)
+mse = mean_squared_error(Y, y_all_pred)
+rmse = np.sqrt(mse)
+r2 = r2_score(Y, y_all_pred)
+
+print("\nModel Evaluation on ALL 100 entries:")
+print(f"Mean Absolute Error (MAE): {mae:.2f}")
+print(f"Mean Squared Error (MSE): {mse:.2f}")
+print(f"Root Mean Squared Error (RMSE): {rmse:.2f}")
+print(f"R² Score (Accuracy Measure): {r2:.4f}")
+
+!pip install reportlab
+
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from datetime import datetime
+
+# IR Voltage to Non-Invasive Value
+ir_voltage = float(input("Enter IR sensor voltage: "))
+non_invasive = ir_voltage / 6
+print(f"Calculated value from IR voltage: {non_invasive:.4f}")
+
+print("\n📥 Enter New Patient Information (Use number codes as shown):")
+
+print("Gender → Male: 1, Female: 2")
+gender = int(input("Gender (1/2): "))
+
+age = int(input("Age (in years): "))
+weight = float(input("Weight (in kg): "))
+
+print("History → Yes: 1, No: 0")
+history = int(input("Any history of diabetes? (1/0): "))
+
+print("Meal/Fast → Fasting: 0, Two hours after lunch: 1, Random: 2, or custom (e.g. 1.5, 2.5)")
+meal_status = float(input("Meal status (e.g. 0/1/2 or 1.5): "))
+
+print("Diabetic Status → Diabetic: 1, Non-Diabetic: 0")
+diabetic_status = int(input("Diabetic status (1/0): "))
+
+thickness = float(input("Finger thickness (in cm): "))
+
+# Final input
+user_input = [[gender, age, weight, history, meal_status, diabetic_status, thickness, non_invasive]]
+
+# Scale and predict
+user_scaled = scaler.transform(user_input)
+predicted_glucose = model.predict(user_scaled)
+
+# Show result
+print("\n" + "="*40)
+print("✅ Predicted Invasive Glucose Level:")
+print(f"➡️  {predicted_glucose[0][0]:.2f} mg/dL")
+print("="*40 + "\n")
+
+# Replace this with user input if needed
+patient_name = input("Enter patient name: ")
+
+# Path for PDF
+pdf_filename = f"{patient_name.replace(' ', '_')}_Glucose_Report.pdf"
+
+# Create canvas
+c = canvas.Canvas(pdf_filename, pagesize=A4)
+width, height = A4
+
+# Header Section
+c.setFont("Helvetica-Bold", 18)
+c.drawCentredString(width / 2, height - 50, "University of Engineering and Technology, Lahore")
+
+c.setFont("Helvetica-Bold", 14)
+c.drawCentredString(width / 2, height - 80, "Department of Computer Engineering")
+
+# Extra space before title
+c.setFont("Helvetica-Bold", 16)
+c.drawCentredString(width / 2, height - 130, "GlucoSense: Smart Non-Invasive Glucose Report")
+
+# Date and Time
+c.setFont("Helvetica", 10)
+c.drawRightString(width - 40, height - 150, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+
+# Patient Information Section
+c.setFont("Helvetica-Bold", 12)
+c.drawString(40, height - 180, "📌 Patient Information:")
+c.setFont("Helvetica", 12)
+
+y = height - 200
+c.drawString(60, y, f"Name: {patient_name}")
+y -= 20
+c.drawString(60, y, f"Gender (1 = Male, 2 = Female): {gender}")
+y -= 20
+c.drawString(60, y, f"Age: {age} years")
+y -= 20
+c.drawString(60, y, f"Weight: {weight} kg")
+y -= 20
+c.drawString(60, y, f"History of Diabetes (1 = Yes, 0 = No): {history}")
+y -= 20
+c.drawString(60, y, f"Meal Status (0 = Fasting, 1 = one hr after lunch, etc.): {meal_status}")
+y -= 20
+c.drawString(60, y, f"Diabetic Status (1 = Diabetic, 0 = Non-Diabetic): {diabetic_status}")
+y -= 20
+c.drawString(60, y, f"Finger Thickness: {thickness} cm")
+
+# Prediction Section
+y -= 40
+c.setFont("Helvetica-Bold", 12)
+c.drawString(40, y, "📊 Predicted Glucose Level:")
+c.setFont("Helvetica", 12)
+y -= 20
+c.drawString(60, y, f"➡️  {predicted_glucose[0][0]:.2f} mg/dL")
+
+# Footer
+c.setFont("Helvetica-Oblique", 10)
+c.drawCentredString(width / 2, 30, "This report is generated by a trained Neural Network Model")
+c.drawCentredString(width / 2, 15, "Developed at UET Lahore, Dept. of Computer Engineering")
+
+# Save PDF
+c.save()
+
+print(f"📄 PDF report generated: {pdf_filename}")

@@ -1,0 +1,72 @@
+import 'package:flutter/material.dart';
+import 'api_service.dart'; // Import your ApiService class
+
+class RegisterPage extends StatefulWidget {
+  @override
+  _RegisterPageState createState() => _RegisterPageState();
+}
+
+class _RegisterPageState extends State<RegisterPage> {
+  final TextEditingController _userNameController = TextEditingController();
+  final TextEditingController _userRoleController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  // Function to call the API for user registration
+  void registerNewUser() {
+    String userName = _userNameController.text;
+    String userRole = _userRoleController.text;
+    String email = _emailController.text;
+    String password = _passwordController.text;
+
+    ApiService()
+        .registerUser(
+          userName,
+          userRole,
+          email,
+          password,
+        )
+        .then((_) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("User Registered Successfully!")),
+          );
+        })
+        .catchError((e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Error: $e")),
+          );
+        });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('User Registration')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: <Widget>[
+            TextField(
+              controller: _userNameController,
+              decoration: InputDecoration(labelText: 'Enter Name'),
+            ),
+            TextField(
+              controller: _userRoleController,
+              decoration: InputDecoration(labelText: 'Enter Role (Patient/Doctor)'),
+            ),
+            TextField(
+              controller: _emailController,
+              decoration: InputDecoration(labelText: 'Enter Email'),
+            ),
+            TextField(
+              controller: _passwordController,
+              decoration: InputDecoration(labelText: 'Enter Password'),
+              obscureText: true,
+            ),
+            ElevatedButton(onPressed: registerNewUser, child: Text('Register')),
+          ],
+        ),
+      ),
+    );
+  }
+}

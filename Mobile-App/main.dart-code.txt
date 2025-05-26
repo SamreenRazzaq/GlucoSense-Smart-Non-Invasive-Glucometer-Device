@@ -1,0 +1,409 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+//import 'package:pdf/pdf.dart';
+import 'dart:async';
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
+// ignore: unused_import
+import 'package:pdf/widgets.dart' as pw;
+import 'package:syncfusion_flutter_pdf/pdf.dart';
+//import 'package:pdf/pdf.dart';
+
+void main() => runApp(GlucometerApp());
+
+class GlucometerApp extends StatelessWidget {
+  const GlucometerApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Glucometer',
+      theme: ThemeData(
+        primaryColor: Color(0xFF48872B),
+        textTheme: GoogleFonts.poppinsTextTheme(),
+      ),
+      home: SplashScreen(),
+      debugShowCheckedModeBanner: false,
+    );
+  }
+}
+
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _SplashScreenState createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Timer(Duration(seconds: 11), () {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => WelcomePage()),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Color(0xFF48872B),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.bloodtype, color: Colors.white, size: 100),
+            SizedBox(height: 20),
+            Text(
+              'Glucometer',
+              style: TextStyle(fontSize: 36, color: Colors.white),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class WelcomePage extends StatelessWidget {
+  const WelcomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Glucometer',
+              style: TextStyle(
+                color: Color(0xFF48872B),
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 40),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginPage()),
+                );
+              },
+              style: ElevatedButton.styleFrom(minimumSize: Size(200, 50)),
+              child: Text('Login', style: TextStyle(fontSize: 20)),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => RegisterPage()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                minimumSize: Size(200, 50),
+                backgroundColor: Colors.white,
+                foregroundColor: Color(0xFF48872B),
+                side: BorderSide(color: Color(0xFF48872B)),
+              ),
+              child: Text('Register', style: TextStyle(fontSize: 20)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ignore: must_be_immutable
+class RegisterPage extends StatelessWidget {
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
+  String selectedRole = 'Patient';
+
+  RegisterPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Register")),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: ListView(
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: InputDecoration(labelText: 'Name'),
+            ),
+            TextField(
+              controller: emailController,
+              decoration: InputDecoration(labelText: 'Email'),
+            ),
+            TextField(
+              controller: passwordController,
+              decoration: InputDecoration(labelText: 'Password'),
+              obscureText: true,
+            ),
+            TextField(
+              controller: confirmPasswordController,
+              decoration: InputDecoration(labelText: 'Confirm Password'),
+              obscureText: true,
+            ),
+            DropdownButtonFormField<String>(
+              value: selectedRole,
+              items:
+                  ['Patient', 'Doctor']
+                      .map(
+                        (role) =>
+                            DropdownMenuItem(value: role, child: Text(role)),
+                      )
+                      .toList(),
+              onChanged: (val) => selectedRole = val!,
+              decoration: InputDecoration(labelText: 'Select Role'),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                // Placeholder logic for register button.
+                // You can add actual registration functionality here.
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginPage()),
+                );
+              },
+              child: Text('Register', style: TextStyle(fontSize: 18)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ignore: must_be_immutable
+class LoginPage extends StatelessWidget {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  String selectedRole = 'Patient';
+
+  LoginPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Login")),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: ListView(
+          children: [
+            TextField(
+              controller: emailController,
+              decoration: InputDecoration(labelText: 'Email'),
+            ),
+            TextField(
+              controller: passwordController,
+              decoration: InputDecoration(labelText: 'Password'),
+              obscureText: true,
+            ),
+            DropdownButtonFormField<String>(
+              value: selectedRole,
+              items:
+                  ['Patient', 'Doctor']
+                      .map(
+                        (role) =>
+                            DropdownMenuItem(value: role, child: Text(role)),
+                      )
+                      .toList(),
+              onChanged: (val) => selectedRole = val!,
+              decoration: InputDecoration(labelText: 'Select Role'),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (context) =>
+                            selectedRole == 'Patient'
+                                ? PatientHomePage()
+                                : DoctorHomePage(),
+                  ),
+                );
+              },
+              child: Text('Login', style: TextStyle(fontSize: 18)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ignore: non_constant_identifier_names
+  PatientHomePage() {}
+}
+
+class PatientHomePage extends StatefulWidget {
+  const PatientHomePage({super.key});
+
+  @override
+  _PatientHomePageState createState() => _PatientHomePageState();
+}
+
+class _PatientHomePageState extends State<PatientHomePage> {
+  String glucoseReading = "Not Available";
+
+  Future<void> _pickPDF(BuildContext context) async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf'],
+    );
+
+    if (result != null) {
+      File file = File(result.files.single.path!);
+      await _extractGlucoseFromPDF(file);
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('No file selected')));
+    }
+  }
+
+  Future<void> _extractGlucoseFromPDF(File file) async {
+    try {
+      // Load the PDF document using Syncfusion
+      final PdfDocument document = PdfDocument(
+        inputBytes: await file.readAsBytes(),
+      );
+
+      // Extract text from all pages
+      String text = PdfTextExtractor(document).extractText();
+
+      // Search for glucose readings like "175 mg/dL"
+      RegExp regExp = RegExp(r'\d+\s*mg/dL', caseSensitive: false);
+      Match? match = regExp.firstMatch(text);
+
+      if (match != null) {
+        setState(() {
+          glucoseReading = match.group(0) ?? "Not Found";
+        });
+      } else {
+        setState(() {
+          glucoseReading = "No glucose reading found.";
+        });
+      }
+
+      // Dispose the document
+      document.dispose();
+    } catch (e) {
+      setState(() {
+        glucoseReading = "Error reading file.";
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Welcome, Patient")),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Last Reading:",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              glucoseReading,
+              style: const TextStyle(fontSize: 20, color: Colors.black87),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              "Weekly Report",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            Expanded(
+              child: Center(
+                child: Text(
+                  "[Fake Weekly Chart Placeholder]",
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Center(
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  _pickPDF(context);
+                },
+                icon: const Icon(Icons.attach_file),
+                label: const Text("Attach Report"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF48872B),
+                  minimumSize: const Size(200, 50),
+                  textStyle: const TextStyle(fontSize: 18),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Center(
+              child: Text("Stay Healthy! ❤️", style: TextStyle(fontSize: 16)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class DoctorHomePage extends StatelessWidget {
+  const DoctorHomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Welcome, Doctor")),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Patients' Readings",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 20),
+            Text(
+              "Patient: Ali — 305 mg/dL — ⚠️ High",
+              style: TextStyle(fontSize: 18),
+            ),
+            SizedBox(height: 10),
+            Text(
+              "Suggestion: Please monitor your diet and reduce sugar intake.",
+              style: TextStyle(fontSize: 16, color: Colors.blueGrey),
+            ),
+            SizedBox(height: 20),
+            Text(
+              "Patient: Sara — 160 mg/dL — Normal",
+              style: TextStyle(fontSize: 18),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
