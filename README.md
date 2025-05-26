@@ -1,12 +1,12 @@
 # GlucoSense – Smart Non-Invasive Glucose Monitoring System
 
-## 📌 Project Overview
+##  Project Overview
 
 **GlucoSense** is a smart, non-invasive glucose monitoring system designed to estimate blood glucose levels without painful finger-pricking. It uses infrared (IR) sensing, an amplification circuit, and a neural network-based machine learning model to predict glucose levels. A mobile application displays the final report to the user in real time.
 
 ---
 
-## 🛠️ Technologies Used
+##  Technologies Used
 
 - **Hardware:**
   - IR Sender and IR Receiver
@@ -22,7 +22,7 @@
 
 ---
 
-## ✅ Functional Highlights
+##  Functional Highlights
 
 - Non-invasive glucose estimation using a single IR sensor setup
 - Amplified signal is read by Arduino Nano
@@ -32,7 +32,7 @@
 
 ---
 
-## 🔮 Future Enhancements
+##  Future Enhancements
 
 - Add camera module for capturing multifactorial skin parameters (color, texture, thickness)
 - Cloud storage of patient reports for historical tracking
@@ -42,7 +42,7 @@
 
 ---
 
-## 🤝 Handover / Takeover (HOTO)
+##  Handover / Takeover (HOTO)
 
 - Complete documentation and source code included
 - ML model and training notebook provided
@@ -51,7 +51,7 @@
 
 ---
 
-## 🔧 Installation Instructions (Optional)
+##  Installation Instructions (Optional)
 
 **For Arduino:**
 1. Open `main.ino` from `Arduino_Code/`
@@ -69,7 +69,7 @@
 
 ---
 
-## 👥 Team Members
+##  Team Members
 
 - Aiman Malik – 2021-CE-23  
 - Ayesha – 2021-CE-18  
@@ -78,14 +78,14 @@
 
 ---
 
-## 🧑‍🏫 Supervisors
+##  Supervisors
 
 - Dr. Yasir Saleem  
 - Engr. Afeef Obaid (Co-supervisor)
 
 ---
 
-## 📃 License
+##  License
 
 This project is for academic and research purposes only.  
 Contact us or the department for reuse or extension permissions.
